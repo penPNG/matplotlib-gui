@@ -27,11 +27,11 @@ class TheFrame(Frame):
         self.initUI()
     
     def initUI(self):
-        data = Text(self, width= 40, height=20, wrap="word", font="Consolas 15")    # Creates a textbox that has word wrapping and uses the Consolas font at size 15
-        vs = ttk.Scrollbar(self, orient='vertical', command=data.yview) # Instantiates a scrollbar for the textbox
-        data.config(yscrollcommand=vs.set)      # Modifies the vertical scroll command for the textbox to use the scrollbar
+        self.data = Text(self, width= 40, height=20, wrap="word", font="Consolas 15")    # Creates a textbox that has word wrapping and uses the Consolas font at size 15
+        vs = ttk.Scrollbar(self, orient='vertical', command=self.data.yview) # Instantiates a scrollbar for the textbox
+        self.data.config(yscrollcommand=vs.set)      # Modifies the vertical scroll command for the textbox to use the scrollbar
         vs.grid(column=1, row =0, sticky='ns')  # Puts the scrollbar on the screen, right next to the textbox, stuck to the top and bottom of the row
-        data.grid(column=0, row=0)              # Puts the textbox on the screen, it's rather tall
+        self.data.grid(column=0, row=0)              # Puts the textbox on the screen, it's rather tall
 
         open = ttk.Button(self, text="Open", command=self.openFile) # The open button, opens a file of indeterminable type
         open.focus()                # Auto focuses the button for easy enter use
@@ -42,17 +42,22 @@ class TheFrame(Frame):
         ax.bar(self.words, self.numbers)    # matplotlib
         ax.set_title('words and numbers')   # bullshit
         ax.set_ylabel('numbers')
-        
+
         canvas = FigureCanvasTkAgg(fig, self)           # Create the canvas
         canvas.get_tk_widget().grid(column=2, row=0)    # Put the canvas in frame
         canvas.draw()                                   # Draw the canvas
 
         navFrame = Frame(self)  # A frame specifically for the navbar. I pray to god that it works
-        navFrame.grid(column=2, row=0, sticky='s')
+        navFrame.grid(column=2, row=0, sticky='sw')
         navbar = NavigationToolbar2Tk(canvas, navFrame) # it works
 
 
         
     def openFile(self):
-        file = filedialog.askopenfilename() # Starts a dialog for opening a file
+        fe = [("Text Document","*.txt"),("Excel files","*.xlsx")]   # Right now, it doesn't open excel file properly. I'll have to do some pandas magic for that.
+        file = filedialog.askopenfilename(filetypes=fe) # Starts a dialog for opening a file
         self.f=open(file)   # Opens the file in python
+        self.updateData()
+
+    def updateData(self):
+        self.data.insert(1.0, self.f.read())
