@@ -4,6 +4,8 @@ A small app that's entire purpose is to be a custom little program I made for an
 ## Dependencies
 * matplotlib
 * tkinter
+* re
+* pandas
 
 ## to run
 run matplotlib-gui.py
