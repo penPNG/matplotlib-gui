@@ -7,7 +7,7 @@ from matplotlib.backends.backend_tkagg import (
 from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog
-
+from dataHandling import DataHandling
 
 # This is the best frame to ever frame anything ever.
 class TheFrame(Frame):
@@ -24,18 +24,23 @@ class TheFrame(Frame):
         self.words = self.d.keys()
         self.numbers = self.d.values()
 
+        self.dh = DataHandling()
+
         self.initUI()
     
     def initUI(self):
         self.data = Text(self, width= 40, height=20, wrap="word", font="Consolas 15")    # Creates a textbox that has word wrapping and uses the Consolas font at size 15
         vs = ttk.Scrollbar(self, orient='vertical', command=self.data.yview) # Instantiates a scrollbar for the textbox
         self.data.config(yscrollcommand=vs.set)      # Modifies the vertical scroll command for the textbox to use the scrollbar
-        vs.grid(column=1, row =0, sticky='ns')  # Puts the scrollbar on the screen, right next to the textbox, stuck to the top and bottom of the row
-        self.data.grid(column=0, row=0)              # Puts the textbox on the screen, it's rather tall
+        vs.grid(column=2, row =0, sticky='ns', columnspan=1)  # Puts the scrollbar on the screen, right next to the textbox, stuck to the top and bottom of the row
+        self.data.grid(column=0, row=0, columnspan=2)              # Puts the textbox on the screen, it's rather tall
 
-        open = ttk.Button(self, text="Open", command=self.openFile) # The open button, opens a file of indeterminable type
-        open.focus()                # Auto focuses the button for easy enter use
-        open.grid(column=0, row=2, sticky='sw', pady=5, padx=5)  # Puts the button directly below the textbox for 'convenience'
+        opn = ttk.Button(self, text="Open", command=self.test) # The open button, opens a file of indeterminable type
+        opn.focus()                # Auto focuses the button for easy enter use
+        opn.grid(column=0, row=1, sticky='sw', pady=5, padx=5)  # Puts the button directly below the textbox for 'convenience'
+
+        test = ttk.Button(self, text="test", command=self.test)
+        test.grid(column=1, row=1, sticky='sw', pady=5, padx=5)
 
         fig = Figure(figsize=(5,4), dpi=100)    # The figure. Oh if only I knew how matplotlib worked
         ax = fig.add_subplot()              # Some more
@@ -44,11 +49,11 @@ class TheFrame(Frame):
         ax.set_ylabel('numbers')
 
         canvas = FigureCanvasTkAgg(fig, self)           # Create the canvas
-        canvas.get_tk_widget().grid(column=2, row=0, padx=15)    # Put the canvas in frame
+        canvas.get_tk_widget().grid(column=3, row=0, padx=15)    # Put the canvas in frame
         canvas.draw()                                   # Draw the canvas
 
         navFrame = Frame(self)  # A frame specifically for the navbar. I pray to god that it works
-        navFrame.grid(column=2, row=0, sticky='sw')
+        navFrame.grid(column=3, row=0, sticky='sw')
         navbar = NavigationToolbar2Tk(canvas, navFrame) # it works
 
 
@@ -58,6 +63,10 @@ class TheFrame(Frame):
         file = filedialog.askopenfilename(filetypes=fe) # Starts a dialog for opening a file
         self.f=open(file)   # Opens the file in python
         self.updateData()
+
+    def test(self):
+        self.fh.test(self.data.get(1.0, 'end-1c'))
+        print(self.data.get(1.0, 'end-1c'))
 
     def updateData(self):
         self.data.delete(1.0, END)
