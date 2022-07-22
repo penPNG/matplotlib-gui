@@ -60,4 +60,5 @@ class TheFrame(Frame):
         self.updateData()
 
     def updateData(self):
+        self.data.delete(1.0, END)
         self.data.insert(1.0, self.f.read())
