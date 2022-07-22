@@ -35,7 +35,7 @@ class TheFrame(Frame):
         vs.grid(column=2, row =0, sticky='ns', columnspan=1)  # Puts the scrollbar on the screen, right next to the textbox, stuck to the top and bottom of the row
         self.data.grid(column=0, row=0, columnspan=2)              # Puts the textbox on the screen, it's rather tall
 
-        opn = ttk.Button(self, text="Open", command=self.test) # The open button, opens a file of indeterminable type
+        opn = ttk.Button(self, text="Open", command=self.openFile) # The open button, opens a file of indeterminable type
         opn.focus()                # Auto focuses the button for easy enter use
         opn.grid(column=0, row=1, sticky='sw', pady=5, padx=5)  # Puts the button directly below the textbox for 'convenience'
 
