@@ -7,6 +7,7 @@ class AppContainer(Tk):
         super().__init__()
         self.title('matplotlib-gui')    # Title of the window/container
 
+        self.resizable(0,0) # I can't figure out how to make resizing happy. So it's not gonna!
         self.createFrames()
         
 
