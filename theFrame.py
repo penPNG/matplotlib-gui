@@ -35,7 +35,7 @@ class TheFrame(Frame):
 
         open = ttk.Button(self, text="Open", command=self.openFile) # The open button, opens a file of indeterminable type
         open.focus()                # Auto focuses the button for easy enter use
-        open.grid(column=0, row=2, sticky='sw')  # Puts the button directly below the textbox for 'convenience'
+        open.grid(column=0, row=2, sticky='sw', pady=5, padx=5)  # Puts the button directly below the textbox for 'convenience'
 
         fig = Figure(figsize=(5,4), dpi=100)    # The figure. Oh if only I knew how matplotlib worked
         ax = fig.add_subplot()              # Some more
@@ -44,7 +44,7 @@ class TheFrame(Frame):
         ax.set_ylabel('numbers')
 
         canvas = FigureCanvasTkAgg(fig, self)           # Create the canvas
-        canvas.get_tk_widget().grid(column=2, row=0)    # Put the canvas in frame
+        canvas.get_tk_widget().grid(column=2, row=0, padx=15)    # Put the canvas in frame
         canvas.draw()                                   # Draw the canvas
 
         navFrame = Frame(self)  # A frame specifically for the navbar. I pray to god that it works
