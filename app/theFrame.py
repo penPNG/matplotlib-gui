@@ -7,7 +7,7 @@ from matplotlib.backends.backend_tkagg import (
 from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog
-from dataHandling import DataHandling
+from data.dataHandling import DataHandling
 
 # This is the best frame to ever frame anything ever.
 class TheFrame(Frame):
