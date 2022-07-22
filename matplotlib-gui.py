@@ -1,4 +1,4 @@
-from appContainer import AppContainer
+from app.appContainer import AppContainer
 
 
 if __name__ == "__main__":

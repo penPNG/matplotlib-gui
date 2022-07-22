@@ -65,7 +65,7 @@ class TheFrame(Frame):
         self.updateData()
 
     def test(self):
-        self.fh.test(self.data.get(1.0, 'end-1c'))
+        self.dh.test(self.data.get(1.0, 'end-1c'))
         print(self.data.get(1.0, 'end-1c'))
 
     def updateData(self):

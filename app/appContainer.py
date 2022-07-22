@@ -1,6 +1,6 @@
 from tkinter import Tk
-from controlFrame import ControlFrame
-from theFrame import TheFrame
+from app.controlFrame import ControlFrame
+from app.theFrame import TheFrame
 
 class AppContainer(Tk):
     def __init__(self):
