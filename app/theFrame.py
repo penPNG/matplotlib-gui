@@ -8,6 +8,8 @@ from matplotlib.backends.backend_tkagg import (
 from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog
+
+import pandas as pd
 from data.dataHandling import DataHandling
 
 # This is the best frame to ever frame anything ever.
@@ -82,8 +84,13 @@ class TheFrame(Frame):
     def openFile(self):
         fe = [("Text Document","*.txt"),("Excel files","*.xlsx")]   # Right now, it doesn't open excel file properly. I'll have to do some pandas magic for that.
         file = filedialog.askopenfilename(filetypes=fe) # Starts a dialog for opening a file
-        self.f=open(file)   # Opens the file in python
-        self.updateData()
+        if file.endswith(".txt"):
+            self.f=open(file)   # Opens the file in python
+            self.updateData()   # Updates the textbox
+            self.createDict()   
+            self.dh.organizeInSet(self.dataDict)
+        elif file.endswith(".xlsx"):
+            self.handleExcel(file)
 
     def createDict(self):
         self.data.delete('end-1c')
@@ -93,3 +100,7 @@ class TheFrame(Frame):
     def updateData(self):
         self.data.delete(1.0, END)
         self.data.insert(1.0, self.f.read())
+        
+    def handleExcel(self, f):
+        ef = pd.read_excel(f)
+        print(ef)

@@ -41,6 +41,11 @@ class DataHandling():
 
         print(data)
         return data
+    
+    def organizeInSet(self, d):
+        dataSet = pd.DataFrame(d)
+        print(dataSet)
+        return dataSet
 
 
 # Not to be run on it's own, btw
