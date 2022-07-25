@@ -101,6 +101,36 @@ class TheFrame(Frame):
         self.data.delete(1.0, END)
         self.data.insert(1.0, self.f.read())
         
+    # Super cool comment describing data frames
+        #   min     cause
+    #0  1   1:30    db
+    #1  2   2:03    db
+    #2  3   1:47    db
+
+    # There is a discrepancy in the index and the count. For our purposes we can ignore the index, or label it as #-1 should we need to use it
+
     def handleExcel(self, f):
         ef = pd.read_excel(f)
+        colname=ef.columns     # Grab a list of the column names, so capitalization/names are whatever
+        #ef[colname[1]] = pd.to_datetime(ef[colname[1]])
+        #print(ef[colname[1]])
+        #ef[colname[1]] = ef[colname[1]].dt.strftime("%M:%S")
+        if self.radios.get():   # If we are using tabs
+            self.data.delete(1.0, END)  # Clear textbox
+            count = 0
+            for name in colname:
+                self.data.insert(END, name)
+                count += 1
+                if count < 3:
+                    self.data.insert(END, '\t')
+            for index, row in ef.iterrows():
+                self.data.insert(END, '\n')
+                count = 0
+                for col in row:
+                    self.data.insert(END, str(col))
+                    count += 1
+                    if count < 3:
+                        self.data.insert(END, '\t')
+
+            
         print(ef)
