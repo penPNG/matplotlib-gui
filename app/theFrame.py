@@ -32,11 +32,11 @@ class TheFrame(Frame):
         self.initUI()
     
     def initUI(self):
-        self.data = Text(self, width= 40, height=20, wrap="word", font="Consolas 15")    # Creates a textbox that has word wrapping and uses the Consolas font at size 15
-        vs = ttk.Scrollbar(self, orient='vertical', command=self.data.yview) # Instantiates a scrollbar for the textbox
-        self.data.config(yscrollcommand=vs.set)      # Modifies the vertical scroll command for the textbox to use the scrollbar
+        self.textBox = Text(self, width= 40, height=20, wrap="word", font="Consolas 15")    # Creates a textbox that has word wrapping and uses the Consolas font at size 15
+        vs = ttk.Scrollbar(self, orient='vertical', command=self.textBox.yview) # Instantiates a scrollbar for the textbox
+        self.textBox.config(yscrollcommand=vs.set)      # Modifies the vertical scroll command for the textbox to use the scrollbar
         vs.grid(column=4, row =0, sticky='ns')  # Puts the scrollbar on the screen, right next to the textbox, stuck to the top and bottom of the row
-        self.data.grid(column=0, row=0, columnspan=4)              # Puts the textbox on the screen, it's rather tall
+        self.textBox.grid(column=0, row=0, columnspan=4)              # Puts the textbox on the screen, it's rather tall
 
         opn = ttk.Button(self, text="Open", command=self.openFile) # The open button, opens a file of indeterminable type
         opn.focus()                # Auto focuses the button for easy enter use
@@ -69,16 +69,16 @@ class TheFrame(Frame):
 
 
     def changeToSpaces(self):
-        d = self.data.get(1.0, END)
+        d = self.textBox.get(1.0, END)
         d = d.replace('\t', ' ')
-        self.data.delete(1.0, END)
-        self.data.insert(1.0, d)
+        self.textBox.delete(1.0, END)
+        self.textBox.insert(1.0, d)
 
     def changeToTabs(self):
-        d = self.data.get(1.0, END)
+        d = self.textBox.get(1.0, END)
         d = d.replace(' ', '\t')
-        self.data.delete(1.0, END)
-        self.data.insert(1.0, d)
+        self.textBox.delete(1.0, END)
+        self.textBox.insert(1.0, d)
 
         
     def openFile(self):
@@ -88,18 +88,30 @@ class TheFrame(Frame):
             self.f=open(file)   # Opens the file in python
             self.updateData()   # Updates the textbox
             self.createDict()   
-            self.dh.organizeInSet(self.dataDict)
+            self.data = self.dh.organizeInSet(self.dataDict)    # Put text data in dataframe
+            self.plotChart(1)
         elif file.endswith(".xlsx"):
             self.handleExcel(file)
+            
+    def plotChart(self, istxt):
+        # So basically, I have to do some addition and data handling and im not gonna use the class i made specifically for that reason.
+        # I need to get the titles of the columns because they COULD be diffferent/nonstandard
+        colname = self.data.columns
+        if istxt:
+            self.data[colname[0]] = pd.to_numeric(self.data[colname[0]])
+            self.data[colname[1]] = pd.to_datetime(self.data[colname[1]])
+            self.data[colname[1]] = self.data[colname[1]].dt.strftime("%H:%M")
+            print(self.data)
+            
 
     def createDict(self):
-        self.data.delete('end-1c')
-        self.dataDict = self.dh.createDict(self.data.get(1.0, 'end-1c'), self.radios.get())
-        print(self.data.get(1.0, 'end-1c'))
+        self.textBox.delete('end-1c')  # Remove the last character, usually is a newline character.
+        self.dataDict = self.dh.createDict(self.textBox.get(1.0, 'end-1c'), self.radios.get()) # Create a dictionary with the data
+        print(self.textBox.get(1.0, 'end-1c'))
 
-    def updateData(self):
-        self.data.delete(1.0, END)
-        self.data.insert(1.0, self.f.read())
+    def updateData(self):   # Update text in textbox with file information
+        self.textBox.delete(1.0, END)
+        self.textBox.insert(1.0, self.f.read())
         
     # Super cool comment describing data frames
         #   min     cause
@@ -110,27 +122,29 @@ class TheFrame(Frame):
     # There is a discrepancy in the index and the count. For our purposes we can ignore the index, or label it as #-1 should we need to use it
 
     def handleExcel(self, f):
-        ef = pd.read_excel(f)
-        colname=ef.columns     # Grab a list of the column names, so capitalization/names are whatever
-        #ef[colname[1]] = pd.to_datetime(ef[colname[1]])
-        #print(ef[colname[1]])
+        self.ef = pd.read_excel(f)
+        colname=self.ef.columns     # Grab a list of the column names, so capitalization/names are whatever
+        self.ef[colname[1]] = self.ef[colname[1]].astype(str)
+        self.ef[colname[1]] = pd.to_datetime(self.ef[colname[1]]).dt.strftime("%H:%M")
+        print(self.ef)
         #ef[colname[1]] = ef[colname[1]].dt.strftime("%M:%S")
+        self.ef.groupby(colname[0]).plot.pie(y=colname[0])
         if self.radios.get():   # If we are using tabs
-            self.data.delete(1.0, END)  # Clear textbox
+            self.textBox.delete(1.0, END)  # Clear textbox
             count = 0
             for name in colname:
-                self.data.insert(END, name)
+                self.textBox.insert(END, name) # Insert column name into textbox
                 count += 1
                 if count < 3:
-                    self.data.insert(END, '\t')
-            for index, row in ef.iterrows():
-                self.data.insert(END, '\n')
+                    self.textBox.insert(END, '\t') # If it's not the last name, put a tab after
+            for index, row in self.ef.iterrows():
+                self.textBox.insert(END, '\n') # newline for formatting
                 count = 0
                 for col in row:
-                    self.data.insert(END, str(col))
+                    self.textBox.insert(END, str(col)) # Start inserting data into the textbox
                     count += 1
                     if count < 3:
-                        self.data.insert(END, '\t')
+                        self.textBox.insert(END, '\t') # If it's not the last item in row, put a tab after
 
             
-        print(ef)
+        print(self.ef)

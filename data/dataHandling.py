@@ -44,7 +44,7 @@ class DataHandling():
     
     def organizeInSet(self, d):
         dataSet = pd.DataFrame(d)
-        print(dataSet)
+        #print(dataSet)
         return dataSet
 
 
