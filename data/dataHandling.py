@@ -58,7 +58,9 @@ class DataHandling():
         diff = pd.to_datetime(wrongTime).dt.strftime("%H:%M:%S")
         diff = pd.to_timedelta(diff)
         total = diff.sum()  # Sum up all the total time
-        print(total)    # Debugging
+        # What's really cool ab this is that I can use regular arithmatic with the time! ez circles.
+        print(total, diff)    # Debugging
+        plot = wrongTime[column[1]].plot.pie(subplots=False, figsize=(5,5))
         return total
             
 
