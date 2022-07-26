@@ -42,8 +42,11 @@ class TheFrame(Frame):
         opn.focus()                # Auto focuses the button for easy enter use
         opn.grid(column=0, row=1, sticky='sw', pady=5, padx=5)  # Puts the button directly below the textbox for 'convenience'
 
-        test = ttk.Button(self, text="test", command=self.createDict)
-        test.grid(column=1, row=1, sticky='sw', pady=5, padx=5)
+        # Ideally, it should plot the chart on the first try, but should that not happen, this button is for reorganizing data
+        # in the textbox. It allows you to modify data opened from file without writing to file.
+        # Also, should I want to write to file, the only type i'll ever do is text, despite how easy exporting to excel might be.
+        rload = ttk.Button(self, text="Reload", command=self.createDict)
+        rload.grid(column=1, row=1, sticky='sw', pady=5, padx=5)
         
         self.radios = IntVar()
         self.radios.set(1) # Set default radio button to Tabs
@@ -89,11 +92,13 @@ class TheFrame(Frame):
             self.updateData()   # Updates the textbox
             self.createDict()   
             self.data = self.dh.organizeInSet(self.dataDict)    # Put text data in dataframe
-            self.plotChart(1)
+            self.fixData(1)
+            self.fixTime()
         elif file.endswith(".xlsx"):
             self.handleExcel(file)
+            self.fixTime()
             
-    def plotChart(self, istxt):
+    def fixData(self, istxt):
         # So basically, I have to do some addition and data handling and im not gonna use the class i made specifically for that reason.
         # I need to get the titles of the columns because they COULD be diffferent/nonstandard
         colname = self.data.columns
@@ -113,6 +118,17 @@ class TheFrame(Frame):
         self.textBox.delete(1.0, END)
         self.textBox.insert(1.0, self.f.read())
         
+    # I'm just gonna write one function for both excel and text files for this. It should just work over all. Fingers crossed
+    def fixTime(self):
+        column = self.data.columns
+        wrongTime = self.data[column[1]].astype(str)
+        count = 0
+        for row in wrongTime:
+            wrongTime[count] = "00:"+wrongTime[count]
+            count+=1
+        self.data[column[1]] = pd.to_datetime(wrongTime).dt.strftime("%M:%S")
+        print(self.data[column[1]])
+        
     # Super cool comment describing data frames
         #   min     cause
     #0  1   1:30    db
@@ -122,13 +138,14 @@ class TheFrame(Frame):
     # There is a discrepancy in the index and the count. For our purposes we can ignore the index, or label it as #-1 should we need to use it
 
     def handleExcel(self, f):
-        self.ef = pd.read_excel(f)
-        colname=self.ef.columns     # Grab a list of the column names, so capitalization/names are whatever
-        self.ef[colname[1]] = self.ef[colname[1]].astype(str)
-        self.ef[colname[1]] = pd.to_datetime(self.ef[colname[1]]).dt.strftime("%H:%M")
-        print(self.ef)
+        self.data = pd.read_excel(f)  # I think I can just have one data variable across all formats.
+        colname=self.data.columns     # Grab a list of the column names, so capitalization/names are whatever
+        self.data[colname[1]] = self.data[colname[1]].astype(str)   # Change to a string
+        self.data[colname[1]] = pd.to_datetime(self.data[colname[1]]).dt.strftime("%H:%M")  # And then change back into datetime
+        # Literally shouldn't have to do this, but pandas is dumb.
+        print(self.data)
         #ef[colname[1]] = ef[colname[1]].dt.strftime("%M:%S")
-        self.ef.groupby(colname[0]).plot.pie(y=colname[0])
+        self.data.groupby(colname[0]).plot.pie(y=colname[0])
         if self.radios.get():   # If we are using tabs
             self.textBox.delete(1.0, END)  # Clear textbox
             count = 0
@@ -137,7 +154,7 @@ class TheFrame(Frame):
                 count += 1
                 if count < 3:
                     self.textBox.insert(END, '\t') # If it's not the last name, put a tab after
-            for index, row in self.ef.iterrows():
+            for index, row in self.data.iterrows():
                 self.textBox.insert(END, '\n') # newline for formatting
                 count = 0
                 for col in row:
@@ -147,4 +164,4 @@ class TheFrame(Frame):
                         self.textBox.insert(END, '\t') # If it's not the last item in row, put a tab after
 
             
-        print(self.ef)
+        print(self.data)
