@@ -39,7 +39,7 @@ class DataHandling():
                 counter += 1
 
 
-        print(data)
+        print(data) # Debugging
         return data
     
     def organizeInSet(self, d):

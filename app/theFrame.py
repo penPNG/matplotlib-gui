@@ -92,27 +92,31 @@ class TheFrame(Frame):
             self.updateData()   # Updates the textbox
             self.createDict()   
             self.data = self.dh.organizeInSet(self.dataDict)    # Put text data in dataframe
-            self.fixData(1)
+            self.fixTextData()
             self.fixTime()
         elif file.endswith(".xlsx"):
             self.handleExcel(file)
             self.fixTime()
             
-    def fixData(self, istxt):
+    def fixTextData(self):
         # So basically, I have to do some addition and data handling and im not gonna use the class i made specifically for that reason.
         # I need to get the titles of the columns because they COULD be diffferent/nonstandard
         colname = self.data.columns
-        if istxt:
-            self.data[colname[0]] = pd.to_numeric(self.data[colname[0]])
-            self.data[colname[1]] = pd.to_datetime(self.data[colname[1]])
-            self.data[colname[1]] = self.data[colname[1]].dt.strftime("%H:%M")
-            print(self.data)
+        self.data[colname[0]] = pd.to_numeric(self.data[colname[0]])
+        self.data[colname[1]] = pd.to_datetime(self.data[colname[1]])
+        self.data[colname[1]] = self.data[colname[1]].dt.strftime("%H:%M")
+        print(self.data)    # Debugging
             
+    def reloadData(self):
+        self.createDict()
+        self.data = self.dh.organizeInSet(self.dataDict)
+        self.fixTextData(1)
+        self.fixTime()
 
     def createDict(self):
         self.textBox.delete('end-1c')  # Remove the last character, usually is a newline character.
         self.dataDict = self.dh.createDict(self.textBox.get(1.0, 'end-1c'), self.radios.get()) # Create a dictionary with the data
-        print(self.textBox.get(1.0, 'end-1c'))
+        print(self.textBox.get(1.0, 'end-1c'))  # Debugging
 
     def updateData(self):   # Update text in textbox with file information
         self.textBox.delete(1.0, END)
@@ -120,14 +124,14 @@ class TheFrame(Frame):
         
     # I'm just gonna write one function for both excel and text files for this. It should just work over all. Fingers crossed
     def fixTime(self):
-        column = self.data.columns
-        wrongTime = self.data[column[1]].astype(str)
+        column = self.data.columns  # Can never be too careful
+        wrongTime = self.data[column[1]].astype(str)    # I could probably do this without creating a new series, but whatever
         count = 0
         for row in wrongTime:
-            wrongTime[count] = "00:"+wrongTime[count]
+            wrongTime[count] = "00:"+wrongTime[count]   # This is a little easier with the new variable
             count+=1
-        self.data[column[1]] = pd.to_datetime(wrongTime).dt.strftime("%M:%S")
-        print(self.data[column[1]])
+        self.data[column[1]] = pd.to_datetime(wrongTime).dt.strftime("%M:%S")   # pandas is DUMB
+        print(self.data[column[1]]) # Debugging
         
     # Super cool comment describing data frames
         #   min     cause
@@ -143,7 +147,7 @@ class TheFrame(Frame):
         self.data[colname[1]] = self.data[colname[1]].astype(str)   # Change to a string
         self.data[colname[1]] = pd.to_datetime(self.data[colname[1]]).dt.strftime("%H:%M")  # And then change back into datetime
         # Literally shouldn't have to do this, but pandas is dumb.
-        print(self.data)
+        print(self.data)    # Debugging
         #ef[colname[1]] = ef[colname[1]].dt.strftime("%M:%S")
         self.data.groupby(colname[0]).plot.pie(y=colname[0])
         if self.radios.get():   # If we are using tabs
@@ -164,4 +168,4 @@ class TheFrame(Frame):
                         self.textBox.insert(END, '\t') # If it's not the last item in row, put a tab after
 
             
-        print(self.data)
+        print(self.data)    # Debugging
