@@ -36,7 +36,7 @@ class TheFrame(Frame):
         vs = ttk.Scrollbar(self, orient='vertical', command=self.textBox.yview) # Instantiates a scrollbar for the textbox
         self.textBox.config(yscrollcommand=vs.set)      # Modifies the vertical scroll command for the textbox to use the scrollbar
         vs.grid(column=4, row =0, sticky='ns')  # Puts the scrollbar on the screen, right next to the textbox, stuck to the top and bottom of the row
-        self.textBox.grid(column=0, row=0, columnspan=4)              # Puts the textbox on the screen, it's rather tall
+        self.textBox.grid(column=0, row=0, columnspan=4)    # Puts the textbox on the screen, it's rather tall
 
         opn = ttk.Button(self, text="Open", command=self.openFile) # The open button, opens a file of indeterminable type
         opn.focus()                # Auto focuses the button for easy enter use
@@ -45,7 +45,7 @@ class TheFrame(Frame):
         # Ideally, it should plot the chart on the first try, but should that not happen, this button is for reorganizing data
         # in the textbox. It allows you to modify data opened from file without writing to file.
         # Also, should I want to write to file, the only type i'll ever do is text, despite how easy exporting to excel might be.
-        rload = ttk.Button(self, text="Reload", command=self.createDict)
+        rload = ttk.Button(self, text="Reload", command=self.reloadData)
         rload.grid(column=1, row=1, sticky='sw', pady=5, padx=5)
         
         self.radios = IntVar()
@@ -104,14 +104,15 @@ class TheFrame(Frame):
         colname = self.data.columns
         self.data[colname[0]] = pd.to_numeric(self.data[colname[0]])
         self.data[colname[1]] = pd.to_datetime(self.data[colname[1]])
-        self.data[colname[1]] = self.data[colname[1]].dt.strftime("%H:%M")
         print(self.data)    # Debugging
             
     def reloadData(self):
         self.createDict()
         self.data = self.dh.organizeInSet(self.dataDict)
-        self.fixTextData(1)
+        self.fixTextData()
+        self.total = self.dh.addTime(self.data) # Just gonna sneak this in here while the formatting is juuuuuust right
         self.fixTime()
+
 
     def createDict(self):
         self.textBox.delete('end-1c')  # Remove the last character, usually is a newline character.
@@ -124,14 +125,15 @@ class TheFrame(Frame):
         
     # I'm just gonna write one function for both excel and text files for this. It should just work over all. Fingers crossed
     def fixTime(self):
-        column = self.data.columns  # Can never be too careful
-        wrongTime = self.data[column[1]].astype(str)    # I could probably do this without creating a new series, but whatever
+        colname = self.data.columns  # Can never be too careful
+        #self.data[colname[1]] = self.data[colname[1]].dt.strftime("%H:%M") # Funny enough, this is done when adding.
+        wrongTime = self.data[colname[1]].astype(str)    # I could probably do this without creating a new series, but whatever
         count = 0
         for row in wrongTime:
             wrongTime[count] = "00:"+wrongTime[count]   # This is a little easier with the new variable
             count+=1
-        self.data[column[1]] = pd.to_datetime(wrongTime).dt.strftime("%M:%S")   # pandas is DUMB
-        print(self.data[column[1]]) # Debugging
+        self.data[colname[1]] = pd.to_datetime(wrongTime).dt.strftime("%M:%S")   # pandas is DUMB
+        print(self.data[colname[1]]) # Debugging
         
     # Super cool comment describing data frames
         #   min     cause
@@ -149,7 +151,7 @@ class TheFrame(Frame):
         # Literally shouldn't have to do this, but pandas is dumb.
         print(self.data)    # Debugging
         #ef[colname[1]] = ef[colname[1]].dt.strftime("%M:%S")
-        self.data.groupby(colname[0]).plot.pie(y=colname[0])
+        #self.data.groupby(colname[0]).plot.pie(y=colname[0])   # Not there yet
         if self.radios.get():   # If we are using tabs
             self.textBox.delete(1.0, END)  # Clear textbox
             count = 0

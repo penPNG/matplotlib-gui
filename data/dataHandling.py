@@ -47,6 +47,20 @@ class DataHandling():
         #print(dataSet)
         return dataSet
 
+    def addTime(self, d):
+        column = d.columns
+        d[column[1]] = d[column[1]].dt.strftime("%H:%M")
+        wrongTime = d[column[1]].astype(str)    # I could probably do this without creating a new series, but whatever
+        count = 0
+        for row in wrongTime:
+            wrongTime[count] = "00:"+wrongTime[count]   # This is a little easier with the new variable
+            count+=1
+        diff = pd.to_datetime(wrongTime).dt.strftime("%H:%M:%S")
+        diff = pd.to_timedelta(diff)
+        total = diff.sum()
+        print(total)
+        return total
+            
 
 # Not to be run on it's own, btw
 #-------------------------------
