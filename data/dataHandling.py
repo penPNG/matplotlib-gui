@@ -49,7 +49,7 @@ class DataHandling():
 
     def addTime(self, d):
         column = d.columns
-        d[column[1]] = d[column[1]].dt.strftime("%H:%M")
+        d[column[1]] = d[column[1]].dt.strftime("%H:%M")    # This affects the original variable passed in
         wrongTime = d[column[1]].astype(str)    # I could probably do this without creating a new series, but whatever
         count = 0
         for row in wrongTime:
@@ -57,8 +57,8 @@ class DataHandling():
             count+=1
         diff = pd.to_datetime(wrongTime).dt.strftime("%H:%M:%S")
         diff = pd.to_timedelta(diff)
-        total = diff.sum()
-        print(total)
+        total = diff.sum()  # Sum up all the total time
+        print(total)    # Debugging
         return total
             
 
