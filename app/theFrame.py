@@ -1,5 +1,5 @@
 import re
-import matplotlib
+import matplotlib as plt
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg,      # Oh my god I'm not the first person to think of this horrible thing.
@@ -17,15 +17,13 @@ class TheFrame(Frame):
     def __init__(self, container):
         super().__init__(container)
         
-        matplotlib.use('TkAgg') # Apparently, I'm not the first person to think of this monstrosity.
-        self.d = {
-            'this': 25.1,
-            'is': 13.5,
-            'temp': 15.6,
-            'data': 20
-        }
-        self.words = self.d.keys()
-        self.numbers = self.d.values()
+        plt.use('TkAgg') # Apparently, I'm not the first person to think of this monstrosity.
+        self.example = pd.DataFrame({
+            'data': [pd.Timedelta(hours=0,minutes=1,seconds=30),pd.Timedelta(hours=0,minutes=0, seconds=47), 
+                     pd.Timedelta(hours=0,minutes=18, seconds=17)]
+        })
+        #self.words = self.example.keys()
+        #self.numbers = self.example.values()
 
         self.dh = DataHandling()
 
@@ -55,20 +53,22 @@ class TheFrame(Frame):
         spaces.grid(column=2, row=1, sticky='w', padx=5, pady=5)
         tabs.grid(column=3, row=1, sticky='w', padx=5, pady=5)
         
-
-        fig = Figure(figsize=(5,4), dpi=100)    # The figure. Oh if only I knew how matplotlib worked
-        ax = fig.add_subplot()              # Some more
-        ax.bar(self.words, self.numbers)    # matplotlib
-        ax.set_title('words and numbers')   # bullshit
-        ax.set_ylabel('numbers')
-
-        canvas = FigureCanvasTkAgg(fig, self)           # Create the canvas
-        canvas.get_tk_widget().grid(column=7, row=0, padx=15)    # Put the canvas in frame
-        canvas.draw()                                   # Draw the canvas
+        self.example['data'] = self.timeToSec(self.example['data'])
+        #self.fig = Figure(figsize=(5,4), dpi=100)    # The figure. Oh if only I knew how matplotlib worked
+        self.fig = self.example.plot.pie(title="Example", y='data', figsize=(5,4)).get_figure()
+        #ax = fig.add_subplot()              # Some more
+        #fig, ax = plt.subplots()
+        #ax.pie(self.numbers, labels=self.words)    # matplotlib
+        #ax.set_title('words and numbers')   # bullshit
+        #ax.set_ylabel('numbers')
+        
+        self.canvas = FigureCanvasTkAgg(self.fig, self)           # Create the canvas
+        self.canvas.get_tk_widget().grid(column=7, row=0, padx=15)    # Put the canvas in frame
+        self.canvas.draw()                                   # Draw the canvas
 
         navFrame = Frame(self)  # A frame specifically for the navbar. I pray to god that it works
         navFrame.grid(column=7, row=0, sticky='sw')
-        navbar = NavigationToolbar2Tk(canvas, navFrame) # it works
+        navbar = NavigationToolbar2Tk(self.canvas, navFrame) # it works
 
 
     def changeToSpaces(self):
@@ -106,13 +106,32 @@ class TheFrame(Frame):
         self.data[colname[1]] = pd.to_datetime(self.data[colname[1]])
         print(self.data)    # Debugging
             
-    def reloadData(self):
+    def reloadData(self):   # Recrates the dictionary with what's in the textox
         self.createDict()
         self.data = self.dh.organizeInSet(self.dataDict)
         self.fixTextData()
         self.total = self.dh.addTime(self.data) # Just gonna sneak this in here while the formatting is juuuuuust right
         self.fixTime()
+        self.timeToSec(self.data['min'])
 
+    def timeToSec(self, d):
+        time = d.astype(str)
+        seconds = []
+        for t in time:
+            if len(t) <= 5:
+                mn = int(t[:2])*60
+                sc = int(t[3:])
+                sc += mn
+                seconds.append(sc)
+            elif len(t) >= 7:
+                if 'days' in t:
+                    t = t[7:]
+                hr = int(t[:2])*60
+                mn =(int(t[3:5])*60)+hr
+                sc = int(t[6:])
+                sc += mn
+                seconds.append(sc)
+        return(seconds)
 
     def createDict(self):
         self.textBox.delete('end-1c')  # Remove the last character, usually is a newline character.

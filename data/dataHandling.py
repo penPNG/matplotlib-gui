@@ -60,7 +60,7 @@ class DataHandling():
         total = diff.sum()  # Sum up all the total time
         # What's really cool ab this is that I can use regular arithmatic with the time! ez circles.
         print(total, diff)    # Debugging
-        plot = wrongTime[column[1]].plot.pie(subplots=False, figsize=(5,5))
+        #plot = wrongTime[column[1]].plot.pie(subplots=False, figsize=(5,5))
         return total
             
 
